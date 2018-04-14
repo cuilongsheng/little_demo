@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>loading</title>
+    <script src="./lib/js/jquery.js"></script>
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <script>
+        function loadDialog(pWidth, pContent) {
+            $("#msg").remove();
+            //弹出框大小和位置,改变div的top和left值来设置需要出现的位置,p的样式设置显示框的大小和内容.
+            var newhtml = `<div id="msg" style="
+                            position:fixed;
+                            top:10%;
+                            left:0;
+                            width:100%;
+                            height:20%;">
+                                <p style="
+                                background:#000;
+                                opacity:0.2;
+                                width: ${pWidth};
+                                color:#fff;
+                                text-align:center;
+                                padding:10px 10px;
+                                margin:0 auto;
+                                font-size:12px;
+                                border-radius:4px;
+                                z-index:100;">
+                                    ${pContent} 
+                                </p>
+                            </div>`
+                //显示
+            $("body").append(newhtml);
+            //3秒后消失
+            var t = setTimeout(disappear, 3000);
+            //执行消失的方法
+            function disappear() {
+                $("#msg").fadeOut(1000); //淡出1秒
+            }
+        }
+        //宽度和内容
+        loadDialog("100%", "我是中间的文本内容");
+    </script>
+</body>
+
+</html>

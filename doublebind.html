@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>javascript实现双向绑定</title>
+    <script src="lib/js/jquery.js"></script>
+    <style>
+        .filelist {
+            widows: 10%;
+            padding: 0 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <input q-value="value" type="file" id="changeInput">
+    <div q-text="value" id="showName"></div>
+    <script>
+        /**
+         * 通过的监听input的change事件来绑定值赋给showName
+         */
+        var elems = [document.getElementById('showName'), document.getElementById('changeInput')];
+
+
+        var data = {
+            value: 'hello!'
+        };
+
+
+        var command = {
+            text: function(str) {
+                this.innerHTML = str;
+            },
+            value: function(str) {
+                this.setAttribute('value', str);
+            }
+        };
+
+        var scan = function() {
+            /**
+             * 扫描带指令的节点属性
+             */
+            for (var i = 0, len = elems.length; i < len; i++) {
+                var elem = elems[i];
+                elem.command = [];
+                for (var j = 0, len1 = elem.attributes.length; j < len1; j++) {
+                    var attr = elem.attributes[j];
+                    if (attr.nodeName.indexOf('q-') >= 0) {
+                        /**
+                         * 调用属性指令，这里可以使用数据改变检测
+                         */
+                        command[attr.nodeName.slice(2)].call(elem, data[attr.nodeValue]);
+                        elem.command.push(attr.nodeName.slice(2));
+                    }
+                }
+            }
+        }
+
+
+
+        /**
+         * 设置数据后扫描
+         */
+        function mvSet(key, value) {
+            data[key] = value;
+            scan();
+        }
+        //获取添加的文件名数组
+        fileNameArray = [];
+
+        function getFileName() {
+            var filePath = $('#changeInput').val();
+            var fileString = filePath.lastIndexOf("\\");
+            fileName = filePath.substring(fileString + 1)
+            fileNameArray.push(fileName);
+            return fileNameArray;
+        }
+        /**
+         * 数据绑定监听
+         */
+
+        elems[1].addEventListener('change', function(e) {
+            getFileName();
+            var length = fileNameArray.length;
+            if (length <= 3) {
+                switch (length) {
+                    case 1:
+                        mvSet('value', `<span class="filelist">${fileNameArray[0]}</span>`);
+                        break;
+                    case 2:
+                        mvSet('value', `<span class="filelist">${fileNameArray[0]}</span>
+                        <span class="filelist">${fileNameArray[1]}</span>`);
+                        break;
+                    case 3:
+                        mvSet('value', `<span class="filelist">${fileNameArray[0]}</span>
+                        <span class="filelist">${fileNameArray[1]}</span>
+                        <span class="filelist">${fileNameArray[2]}</span>`);
+                        break;
+                }
+
+            } else {
+                mvSet('value', `<span class="filelist">${fileNameArray[0]}</span>
+                <span class="filelist">${fileNameArray[1]}</span>
+                <span class="filelist">${fileNameArray[2]}......</span>
+                <span class="filelist">（${length}）</span>`);
+            }
+
+        }, false);
+
+        scan();
+
+        /**
+         * 改变数据更新视图
+         */
+        setTimeout(function() {
+            //初始值(0)
+            mvSet('value', '(0)');
+        }, 0)
+    </script>
+</body>
+
+</html>

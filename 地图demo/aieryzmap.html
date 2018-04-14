@@ -1,0 +1,124 @@
+<!-- <%@ page language="java" import="java.util.*" pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>    -->
+
+<!-- EL表达式生效 -->
+<!-- <%@ page isELIgnored="false" %>
+<%
+String path = request.getContextPath();
+String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+path+"/";
+%> -->
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; UTF-8">
+    <title>中国追溯云</title>
+    <base href="<%=basePath%>">
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width">
+    <script src="../lib/js/jquery.js"></script>
+    <link rel="stylesheet" href="../lib/css/bootstrap.min.css">
+    <script src="../lib/js/bootstrap.min.js"></script>
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+            font-family: "微软雅黑";
+        }
+        
+        html {
+            font-size: 17px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="container"></div>
+
+    <script type="text/javascript" src="http://webapi.amap.com/maps?v=1.4.2&key=f645647d135db21bc2cd30c034a30135&plugin=AMap.Autocomplete,AMap.PlaceSearch"></script>
+    <link rel="stylesheet" href="http://cache.amap.com/lbs/static/main1119.css" />
+    <script type="text/javascript" src="http://cache.amap.com/lbs/static/addToolbar.js"></script>
+    <!-- <script src="../lib/js/getlocation.js"></script> -->
+    <script>
+        (function() {
+            var b = document.documentElement,
+                a = function() {
+                    var a = b.getBoundingClientRect().width;
+                    b.style.fontSize = (100 / 750) * (a >= 750 ? 750 : a) + "px"
+                },
+                c = null;
+            window.addEventListener("resize", function() {
+                clearTimeout(c);
+                c = setTimeout(a, 300);
+            });
+            a()
+        })();
+    </script>
+    <script>
+        $(function() {
+            // 根据输入框信息进行搜索定位
+            var loc = location.href;
+            var n1 = loc.length; //地址的总长度
+            var n2 = loc.indexOf("="); //取得=号的位置
+            var address = decodeURI(loc.substr(n2 + 1, n1 - n2)); //从=号后面的内容
+            console.log(address);
+            //地图加载
+            var map = new AMap.Map("container", {
+                resizeEnable: true
+            });
+            //输入提示
+            var autoOptions = {
+                input: this.address,
+            };
+            var auto = new AMap.Autocomplete(autoOptions);
+            var placeSearch = new AMap.PlaceSearch({
+                map: map
+            }); //构造地点查询类
+            AMap.event.addListener(auto, "select", select); //注册监听，当选中某条记录时会触发
+            function select(e) {
+                placeSearch.setCity(e.poi.adcode);
+                placeSearch.search(e.poi.name); //关键字查询查询
+            }
+            // var placeSearch = new AMap.PlaceSearch(); //构造地点查询类
+            // placeSearch.search(address, function(status, result) {
+
+            // });
+            // //详情查询
+            // placeSearch.getDetails("B000A83U0P", function(status, result) {
+            //     if (status === 'complete' && result.info === 'OK') {
+            //         placeSearch_CallBack(result);
+            //     }
+            // });
+            var infoWindow = new AMap.InfoWindow({
+                autoMove: true,
+                offset: {
+                    x: 0,
+                    y: -30
+                }
+            });
+            //回调函数
+            function placeSearch_CallBack(data) {
+                var poiArr = data.poiList.pois;
+                //添加marker
+                var marker = new AMap.Marker({
+                    map: map,
+                    position: poiArr[0].location
+                });
+                map.setCenter(marker.getPosition());
+                infoWindow.setContent(createContent(poiArr[0]));
+                infoWindow.open(map, marker.getPosition());
+            }
+
+            function createContent(poi) { //信息窗体内容
+                var s = [];
+                s.push("<b>名称：" + poi.name + "</b>");
+                s.push("地址：" + poi.address);
+                s.push("电话：" + poi.tel);
+                s.push("类型：" + poi.type);
+                return s.join("<br>");
+            }
+        });
+    </script>
+
+</body>
+
+</html>
